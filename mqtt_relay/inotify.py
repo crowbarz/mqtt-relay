@@ -9,9 +9,9 @@ from pathlib import Path
 from threading import Thread
 
 import inotify_simple as inotify
+from mqtt_base.event import AppEvent
 
 from .const import APP_NAME
-from .event import AppEvent
 
 _LOGGER = logging.getLogger(APP_NAME)
 
@@ -41,13 +41,9 @@ DEF_INOTIFY_FLAGS_RESTART = (  # re-create inotify watcher
 class INotifyEvent(AppEvent):
     """Event class for inotify event."""
 
-    pass
-
 
 class INotifyShutdown(Exception):
     """Exception class for inotify thread shutdown."""
-
-    pass
 
 
 class INotifyWatcher(Thread):
@@ -70,6 +66,7 @@ class INotifyWatcher(Thread):
 
     def cleanup(self):
         """Clean up inotify watcher."""
+        _LOGGER.info("cleaning up watcher")
         if self.__inotify:
             self.__inotify.close()
             del self.__inotify
@@ -79,6 +76,7 @@ class INotifyWatcher(Thread):
 
     def setup(self):
         """Set up inotify watcher."""
+        _LOGGER.info("setting up watcher")
         self.__inotify = inotify.INotify()
         try:
             if not (self.__path.is_file() and os.access(self.__path, os.R_OK)):
@@ -144,9 +142,9 @@ class INotifyWatcher(Thread):
         ## Create a pipe for signalling shutdown
         self.__read_fd, write_fd = os.pipe()
         self.__write = os.fdopen(write_fd, "wb")
+        self.setup()
 
         while True:
-            self.setup()
             try:
                 if self.main_loop():
                     continue
@@ -163,6 +161,7 @@ class INotifyWatcher(Thread):
             self.cleanup()
             _LOGGER.info("restarting watcher after %ds delay", self.__restart_delay)
             time.sleep(self.__restart_delay)
+            self.setup()
 
     def shutdown(self):
         """Shut down the inotify watcher thread."""

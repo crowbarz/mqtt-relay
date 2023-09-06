@@ -18,7 +18,6 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Framework :: AsyncIO",
         "Operating System :: POSIX :: Linux",
         "Intended Audience :: System Administrators",
         "License :: OSI Approved :: MIT License",
@@ -30,8 +29,7 @@ setuptools.setup(
     ],
     python_requires=">=3.6",
     install_requires=[
-        "python-daemon==3.0.1",
-        "paho-mqtt==1.6.1",
+        "mqtt-base @ git+https://github.com/crowbarz/mqtt-base.git",
         "inotify-simple==1.3.5",
     ],
     entry_points={
